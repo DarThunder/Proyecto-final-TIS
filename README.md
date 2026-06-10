@@ -1,7 +1,7 @@
 **PROYECTO DE TÉCNOLOGIAS PARA LA INTEGRACIÓN**
 
 *EJECUTAR LOS CONTENEDORES*  
-docker compose down -v && docker-compose up --build -d
+>docker compose down -v && docker-compose up --build -d
 
 *ABRIR BASES DE DATOS:*  
 >docker exec -it BD_Usuarios psql -U UserPapu -d sicaeUsuario  
