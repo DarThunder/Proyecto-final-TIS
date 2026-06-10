@@ -1,4 +1,4 @@
-package mx.edu.uv.vehicle_service;
+package mx.edu.uv.vehiculo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
