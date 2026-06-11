@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +33,11 @@ public class VehiculoController {
         this.vs = vs;
     }
 
+    /**
+     * ENDPOINT DE PRUEBA PARA RETORNAR TODAS LAS MARCAS DE VEHICULOS
+     * 
+     * @return 
+     */
     @GetMapping("/marcas")
     public List<Marca> listarMarcas() {
         return vs.obtenerMarcas();
@@ -95,6 +101,79 @@ public class VehiculoController {
         } catch (Exception e) {
             // ERROR EN CASO DE QUE HAYA PASADO ALGO AL BUSCAR LA PLACA
             return ResponseEntity.internalServerError().body("Error al encontrar la placa");
+        }
+    }
+    
+    /**
+     * ENDPOINT PARA REGRESAR VEHICULO CON EL ID
+     * 
+     * @param idVehiculo
+     * @return 
+     */
+    @GetMapping("/obtener-vehiculo/{idVehiculo}")
+    public ResponseEntity<?> obtenerVehiculoDeID(@PathVariable Integer idVehiculo){
+        try {
+            VehiculoFullEntity vehiculo = vs.obtenerVehiculoDeIDService(idVehiculo);
+            return ResponseEntity.ok(vehiculo);
+            
+        } catch (Exception e) {
+            // ERROR EN CASO DE QUE HAYA PASADO ALGO AL BUSCAR EL VEHICULO
+            return ResponseEntity.internalServerError().body("Error al encontrar el vehiculo");
+        }
+    }
+    
+    /**
+     * ENDPOINT PARA ACTUALIZAR UN VEHICULO EXISTENTE PASANDOLE SU ID
+     * 
+     * El usuario mete el ID en la URL y a su vez mete los datos que quiere actualizar dentro del Body
+     * 
+     * @param idVehiculo
+     * @param vehiculoNuevo
+     * @return 
+     */
+    @PutMapping("/actualizar-vehiculo/{idVehiculo}")
+    public ResponseEntity<?> actualizarVehiculoController(
+            @PathVariable Integer idVehiculo, @RequestBody VehiculoEntity vehiculoNuevo){
+        // HACEMOS UN TRY CATCH YA QUE NO NOS DEJA MANDAR A LLAMAR A LA OTRA FUNCIÓN ASI NADAMÁS
+        try {
+            vs.actualizarVehiculoService(idVehiculo, vehiculoNuevo);
+            // EL RESPONSE ENTITY SIRVE PARA CHECAR LA RESPUESTA QUE SE OBTENGA DE LA PETICIÓN
+            return ResponseEntity.ok("Actualización exitosa de vehiculo con el ID: " + idVehiculo);
+
+        } catch (IllegalArgumentException iae) {
+            // ERROR EN CASO DE QUE FALTE ALGUN PARAMETRO EN EL BODY
+            return ResponseEntity.badRequest().body(iae.getMessage());
+
+        } catch (Exception e) {
+            // ERROR POR SI LA BASE DE DATOS TIENE ALGUN PROBLEMA
+            return ResponseEntity.internalServerError().body("Ocurrió un error al actualizar el vehículo.");
+        }
+    }
+    
+    /**
+     * ENDPOINT PARA ACTUALIZAR EL ESTADO DE UN VEHICULO EXISTENTE
+     * 
+     * En vez de mandarle todo el objeto de vehiculo, solo se manda el ID y el Estado.
+     * 
+     * @param idVehiculo
+     * @param estatus
+     * @return 
+     */
+    @PutMapping("/actualizar-vehiculo/estatus/{idVehiculo}")
+    public ResponseEntity<?> actualizarEstatusVehiculoController(
+            @PathVariable Integer idVehiculo, @RequestBody Boolean estatus){
+        try {
+            vs.actualizarEstatusVehiculoService(idVehiculo, estatus);
+            // EL RESPONSE ENTITY SIRVE PARA CHECAR LA RESPUESTA QUE SE OBTENGA DE LA PETICIÓN
+            return ResponseEntity.ok("Actualización exitosa del estatus del vehiculo:  "+ idVehiculo +" a: "+ estatus);
+
+        } catch (IllegalArgumentException iae) {
+            // ERROR EN CASO DE QUE FALTE ALGUN PARAMETRO EN EL BODY
+            return ResponseEntity.badRequest().body(iae.getMessage());
+
+        } catch (Exception e) {
+            // ERROR POR SI LA BASE DE DATOS TIENE ALGUN PROBLEMA
+            return ResponseEntity.internalServerError().body("Ocurrió un error al actualizar el estatus del vehículo.");
         }
     }
 }

@@ -6,7 +6,9 @@ import mx.edu.uv.vehiculo.entity.VehiculoEntity;
 import mx.edu.uv.vehiculo.entity.VehiculoFullEntity;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * ACA SE HACEN TODAS LAS CONSULTAS A LA BD DE MYSQL
@@ -26,10 +28,26 @@ public interface VehiculoRepository {
     List<Marca> obtenerMarcasRepository();
     
     /**
+     * SE OBTIENE TODO UN VEHICULO TAN SOLO DE SU ID
+     * 
+     * @param idVehiculo
+     */
+    @Select("SELECT * FROM vehiculo WHERE idVehiculo = #{idVehiculo}")
+    VehiculoEntity obtenerVehiculoDeIdRepository(Integer idVehiculo);
+    
+    /**
+     * LO MISMO QUE LA DE ARRIBA PERO AHORA NOS REGRESA EL VEHICULO FULL
+     * EN VEZ DEL NORMALITO
+     * 
+     * @param idVehiculo
+     */
+    @Select("SELECT * FROM vehiculofullinfo WHERE idVehiculo = #{idVehiculo}")
+    VehiculoFullEntity obtenerVehiculoDeId2Repository(Integer idVehiculo);
+    
+    /**
      * REGRESA EL ID UN VEHICULO PASANDO SU PLACA
      * 
      * @param placa
-     * @return 
      */
     @Select("SELECT idVehiculo FROM vehiculofullinfo WHERE placa = #{placa}")
     String obtenerIdVehiculoDePlacaRepository(String placa);
@@ -39,7 +57,6 @@ public interface VehiculoRepository {
      * VEHICULOS RESPECTIVOS A ESTE.
      * 
      * @param idUsuario
-     * @return 
      */
     @Select("SELECT * FROM vehiculofullinfo WHERE idUsuario = #{idUsuario}")
     List<VehiculoFullEntity> obtenerVehiculosPorIDRepository(Integer idUsuario);
@@ -63,10 +80,9 @@ public interface VehiculoRepository {
     /**
      * RETORNA EL NUMERO DE VEHICULOS ACTIVOS QUE TIENE UN USUARIO
      * 
-     * Este nuemero se retorna en el Service y se hace la validación para ver si es mayor o menor que 4
+     * Este numero se retorna en el Service y se hace la validación para ver si es mayor o menor que 4
      * 
      * @param idUsuario
-     * @return # De vehiculos activos correspondientes a ese id de Usuario
      */
     @Select("SELECT COUNT(*) FROM vehiculofullinfo WHERE estatus = 1 AND idUsuario = #{idUsuario}")
     Integer usuarioTiene4VehiculosRepository(Integer idUsuario);
@@ -75,8 +91,27 @@ public interface VehiculoRepository {
      * RETORNA EL NUMERO DE VEHICULOS CON UNA PLACA
      * 
      * @param placa
-     * @return # De vehiculos con esa misma placa
      */
     @Select("SELECT COUNT(*) FROM vehiculofullinfo WHERE placa = #{placa}")
     Integer validacionPlacaRepository(String placa);
+    
+    /**
+     * ACTUALIZA LOS VALORES DE UN VEHICULO EXISTENTE
+     * 
+     * @param vehiculo 
+     */
+    @Update("UPDATE vehiculo SET claveVehiculo = #{claveVehiculo}, idModelo = #{idModelo}, "
+            + "placa = #{placa}, color = #{color}, anio = #{anio}, descripcion = #{descripcion} WHERE idVehiculo = #{idVehiculo}")
+    void actualizarVehiculoRepository(VehiculoEntity vehiculo);
+    
+    /**
+     * ACTUALIZA EL ESTADO DE UN VEHICULO EXISTENTE
+     * 
+     * Se usan @Param para evitar confusiones con los nombres de las variables en el MyBatis
+     * 
+     * @param idVehiculo
+     * @param estatus 
+     */
+    @Update("UPDATE vehiculo SET estatus = #{estatus} WHERE idVehiculo = #{idVehiculo}")
+    void actualizarEstatusVehiculoRepository(@Param("idVehiculo") Integer idVehiculo, @Param("estatus") Boolean estatus);
 }

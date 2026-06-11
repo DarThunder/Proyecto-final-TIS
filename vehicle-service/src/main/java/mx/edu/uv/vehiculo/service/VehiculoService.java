@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
  * ACA SE HACEN TODAS LAS FUNCIONES Y OPERACIÓNES CMOPLEJAS PARA EL
  * MICROSERVICIO DE VEHICULO.
  *
- * LAS VALIDACIONES DEL TOKEN SE HACEN DENTRO DE LA CARPETA /vehiculo/sec
+ * LAS VALIDACIONES DEL TOKEN DE LOGIN SE HACEN DENTRO DE LA CARPETA /vehiculo/sec
+ * Y FUERON HECHAS POR Ernesto Caraza
  *
  * @author Gustavo López
  */
@@ -74,19 +75,19 @@ public class VehiculoService {
         if (vehiculo.getClaveVehiculo() == null || vehiculo.getClaveVehiculo().isEmpty()) {
             throw new IllegalArgumentException("Campo de clave vacio, ingresa un valor");
         }
-        if(vehiculo.getIdModelo() == null || vehiculo.getIdModelo() <= 0 || vehiculo.getIdModelo() > 39){
+        if (vehiculo.getIdModelo() == null || vehiculo.getIdModelo() <= 0 || vehiculo.getIdModelo() > 39) {
             throw new IllegalArgumentException("Error con el campo de idModelo, ingrese un numero valido (1-39)");
+        }
+        if (vehiculo.getPlaca() == null || vehiculo.getPlaca().isEmpty()) {
+            throw new IllegalArgumentException("Campo de placa vacio, ingrese un valor");
         }
         if (vehiculo.getColor() == null || vehiculo.getColor().isEmpty()) {
             throw new IllegalArgumentException("Campo de color, ingresa un valor");
         }
-         if (vehiculo.getPlaca() == null || vehiculo.getPlaca().isEmpty()) {
-            throw new IllegalArgumentException("Campo de placa vacio, ingrese un valor");
-        }
-         if (vehiculo.getAnio() == null || vehiculo.getAnio() <  1980 || vehiculo.getAnio() > 2026) {
+        if (vehiculo.getAnio() == null || vehiculo.getAnio() < 1980 || vehiculo.getAnio() > 2026) {
             throw new IllegalArgumentException("Año invalido, ingresa un año valido (1980-2026)");
         }
-         if (vehiculo.getDescripcion() == null || vehiculo.getDescripcion().isEmpty()) {
+        if (vehiculo.getDescripcion() == null || vehiculo.getDescripcion().isEmpty()) {
             throw new IllegalArgumentException("Descripción vacia, ingresa una descripción");
         }
         if (!validacionPlaca(vehiculo.getPlaca())) {
@@ -126,20 +127,101 @@ public class VehiculoService {
         }
         return true;
     }
-    
+
     /**
      * VALIDACIÓN DE PLACA VACIA PARA RETORNAR SU ID RESPECTIVO
-     * 
+     *
      * @param placa
-     * @return 
+     * @return
      */
-    public String obtenerIdVehiculoDePlacaService(String placa){
-        if(placa != null &&  !placa.trim().isEmpty()){
+    public String obtenerIdVehiculoDePlacaService(String placa) {
+        if (placa != null && !placa.trim().isEmpty()) {
             return vr.obtenerIdVehiculoDePlacaRepository(placa);
         }
         throw new IllegalArgumentException("Ingresa una placa valida");
     }
+    
+    /**
+     * VALIDACIÓN DE ID Y DE OBJETO VEHICULO PARA RETORNARLO AL CONTROLLER
+     * 
+     * @param idVehiculo
+     * @return 
+     */
+    public VehiculoFullEntity obtenerVehiculoDeIDService(Integer idVehiculo){
+        if(idVehiculo == null || idVehiculo < 0){
+            throw new IllegalArgumentException("Ingresa un ID valido");
+        }
+        VehiculoFullEntity vehiculo = vr.obtenerVehiculoDeId2Repository(idVehiculo);
+        if(vehiculo == null){
+            throw new IllegalArgumentException("Ese ID no cuenta con un Vehiculo asignado.");
+        }
+        return vehiculo;
+    }
 
-    //EDITAR VEHICULO
-    //CAMBIAR ESTATUS DE VEHICULO
+    /**
+     * ACTUALIZACIÓN DE UN VEHICULO EXISTENTE
+     * 
+     * Se crea un registro del vehiculo original, y se guardan los cambios hechos dentro del JSON
+     * Si hay algun campo que esta vacio o que no cumple con el formato establecido se omite
+     * Si un campo esta bien, se reemplaza el campo original por el nuevo.
+     * 
+     * @param idVehiculo
+     * @param vehiculoNuevo 
+     */
+    public void actualizarVehiculoService(Integer idVehiculo, VehiculoEntity vehiculoNuevo) {
+        VehiculoEntity original = vr.obtenerVehiculoDeIdRepository(idVehiculo);
+        if(original == null){
+            throw new IllegalArgumentException("No existe un vehiculo con ese ID");
+        }
+        if (vehiculoNuevo.getClaveVehiculo() != null && !vehiculoNuevo.getClaveVehiculo().isEmpty()) {
+            original.setClaveVehiculo(vehiculoNuevo.getClaveVehiculo());
+        }
+        if (vehiculoNuevo.getIdModelo() != null && vehiculoNuevo.getIdModelo() > 0 && vehiculoNuevo.getIdModelo() <= 39) {
+            original.setIdModelo(vehiculoNuevo.getIdModelo());
+        }
+        if (vehiculoNuevo.getPlaca() != null && !vehiculoNuevo.getPlaca().isEmpty()) {
+            if (!validacionPlaca(original.getPlaca())) {
+                throw new IllegalArgumentException("Esa placa ya esta registrada, utilice otra");
+            }
+            original.setPlaca(vehiculoNuevo.getPlaca());
+        }
+        if (vehiculoNuevo.getColor() != null && !vehiculoNuevo.getColor().isEmpty()) {
+            original.setColor(vehiculoNuevo.getColor());
+        }
+        if (vehiculoNuevo.getAnio() != null && vehiculoNuevo.getAnio() > 1980 && vehiculoNuevo.getAnio() <= 2026) {
+            original.setAnio(vehiculoNuevo.getAnio());
+        }
+        if (vehiculoNuevo.getDescripcion() != null && !vehiculoNuevo.getDescripcion().isEmpty()) {
+           original.setDescripcion(vehiculoNuevo.getDescripcion());
+        }
+        
+        // CON TODOS LOS DATOS VALIDADOS, SE HACE LA CONSULTA
+        vr.actualizarVehiculoRepository(original);
+    }
+    
+    /**
+     * ACTUALIZACIÓN DEL ESTADO DE UN VEHICULO
+     * 
+     * Primero se checa si el idVehiculo que se manda corresponde a un vehiculo que no sea null
+     * Luego se compara que el estado existente y el nuevo no sean los mismos
+     * Y se actualiza
+     * 
+     * @param idVehiculo
+     * @param estatusNuevo 
+     */
+    public void actualizarEstatusVehiculoService(Integer idVehiculo, Boolean estatusNuevo) {
+        VehiculoEntity original = vr.obtenerVehiculoDeIdRepository(idVehiculo);
+        if(original == null){
+            throw new IllegalArgumentException("No existe un vehiculo con ese ID");
+        }
+        
+        if(estatusNuevo == original.getEstatus()){
+            throw new IllegalArgumentException("El vehiculo ya cuenta con ese estado");
+        }
+        
+        vr.actualizarEstatusVehiculoRepository(idVehiculo, estatusNuevo);
+        
+        // CON TODOS LOS DATOS VALIDADOS, SE HACE LA CONSULTA
+        vr.actualizarVehiculoRepository(original);
+    }
 }
