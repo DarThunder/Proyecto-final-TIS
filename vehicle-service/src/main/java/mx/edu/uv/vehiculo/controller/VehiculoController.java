@@ -33,6 +33,11 @@ public class VehiculoController {
         this.vs = vs;
     }
 
+    /**
+     * ENDPOINT DE PRUEBA PARA RETORNAR TODAS LAS MARCAS DE VEHICULOS
+     * 
+     * @return 
+     */
     @GetMapping("/marcas")
     public List<Marca> listarMarcas() {
         return vs.obtenerMarcas();
@@ -99,6 +104,12 @@ public class VehiculoController {
         }
     }
     
+    /**
+     * ENDPOINT PARA REGRESAR VEHICULO CON EL ID
+     * 
+     * @param idVehiculo
+     * @return 
+     */
     @GetMapping("/obtener-vehiculo/{idVehiculo}")
     public ResponseEntity<?> obtenerVehiculoDeID(@PathVariable Integer idVehiculo){
         try {
