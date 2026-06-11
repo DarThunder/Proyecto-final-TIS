@@ -34,4 +34,10 @@ public class UserService {
         userRepository.insertarUsuario(newUser);
         return "Usuario registrado exitosamente con clave: " + claveGenerada;
     }
+
+    public boolean status(String claveUsuario){
+        Boolean status = userRepository.estatusUsuario(claveUsuario);
+
+        return status != null && status;
+    }
 }

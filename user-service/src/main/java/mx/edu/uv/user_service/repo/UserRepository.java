@@ -12,6 +12,9 @@ public interface UserRepository {
     @Select("SELECT EXISTS(SELECT 1 FROM usuario WHERE username = #{username} OR email = #{correo})")
     boolean existeUsuarioPorCorreoOUsername(@Param("username") String username, @Param("correo") String correo);
 
+    @Select("SELECT estatus FROM usuario WHERE \"claveUsuario\" = #{claveUsuario}")
+    Boolean estatusUsuario(String claveUsuario);
+
     @Insert("INSERT INTO usuario (\"idRol\", \"idTipoUsuario\", \"idProgramaEducativo\", \"claveUsuario\", username, password, email, nombre, \"apellidoPaterno\", \"apellidoMaterno\", estatus, \"tiempoCreacion\") VALUES (#{idRol}, #{idTipoUsuario}, #{idProgramaEducativo}, #{claveUsuario}, #{username}, #{password}, #{correo}, #{nombre}, #{apellidoPaterno}, #{apellidoMaterno}, CAST(#{estatus} AS bit), #{tiempoCreacion})")
     void insertarUsuario(UserEntity usuario);
 }
