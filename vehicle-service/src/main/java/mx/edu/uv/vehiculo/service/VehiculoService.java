@@ -134,7 +134,7 @@ public class VehiculoService {
      * @return 
      */
     public String obtenerIdVehiculoDePlacaService(String placa){
-        if(placa != null || !placa.isEmpty()){
+        if(placa != null &&  !placa.trim().isEmpty()){
             return vr.obtenerIdVehiculoDePlacaRepository(placa);
         }
         throw new IllegalArgumentException("Ingresa una placa valida");

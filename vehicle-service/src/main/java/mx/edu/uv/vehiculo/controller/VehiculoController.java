@@ -87,7 +87,7 @@ public class VehiculoController {
      * @return 
      */
     @GetMapping("/placa/{placa}/id-vehiculo")
-    public ResponseEntity<?> obtenerIdVehiculoDePlacaController(String placa) {
+    public ResponseEntity<?> obtenerIdVehiculoDePlacaController(@PathVariable String placa) {
         try {
             String idVehiculo = vs.obtenerIdVehiculoDePlacaService(placa);
             return ResponseEntity.ok(idVehiculo);
