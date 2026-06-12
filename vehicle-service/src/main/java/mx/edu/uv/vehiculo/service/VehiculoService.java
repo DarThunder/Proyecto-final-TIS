@@ -231,7 +231,7 @@ public class VehiculoService {
             throw new IllegalArgumentException("El vehiculo ya cuenta con ese estado");
         }
         
-        if (!usuarioTiene4Vehiculos(original.getIdUsuario())) {
+        if (estatusNuevo && !usuarioTiene4Vehiculos(original.getIdUsuario())) {
             throw new IllegalArgumentException("Este usuario ya tiene 4 vehiculos activos, desactiva otro para activar este");
         }
         
