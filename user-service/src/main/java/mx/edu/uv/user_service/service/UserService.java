@@ -53,8 +53,8 @@ public class UserService {
         return "Usuario registrado exitosamente con clave: " + claveGenerada;
     }
 
-    public boolean exist(String username){
-        Boolean exist = userRepository.existeUsuarioPorCorreoOUsername(username, "");
+    public boolean exist(int username){
+        Boolean exist = userRepository.existeUsuario(username);
         return exist != null && exist;
     }
 

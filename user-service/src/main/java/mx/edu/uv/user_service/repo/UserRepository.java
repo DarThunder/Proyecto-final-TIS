@@ -11,6 +11,8 @@ import mx.edu.uv.user_service.entity.UserEntity;
 
 @Mapper
 public interface UserRepository {
+    @Select("SELECT EXISTS(SELECT 1 FROM usuario WHERE \"idUsuario\" = #{idUsuario})")
+    boolean existeUsuario(int idUsuario);
     //Incluye username Y correo porque ambos deben ser únicos en el sistema
     @Select("SELECT EXISTS(SELECT 1 FROM usuario WHERE username = #{username} OR email = #{correo})")
     boolean existeUsuarioPorCorreoOUsername(@Param("username") String username, @Param("correo") String correo);
