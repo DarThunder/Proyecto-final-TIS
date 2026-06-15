@@ -126,7 +126,8 @@ CREATE TABLE `vehiculo`  (
 -- ----------------------------
 -- Records of vehiculo
 -- ----------------------------
-
+INSERT INTO `vehiculo` (`idUsuario`, `claveVehiculo`, `idModelo`, `placa`, `color`, `anio`, `descripcion`, `estatus`) 
+VALUES (1, 'V-001', 1, 'YUV1234', 'Rojo', 2024, 'Auto de prueba', b'1');
 -- ----------------------------
 -- View structure for vehiculofullinfo
 -- ----------------------------

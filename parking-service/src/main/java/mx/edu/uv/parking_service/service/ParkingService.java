@@ -33,14 +33,14 @@ public class ParkingService {
 
     public EntradaResponseDTO registrarEntrada(EntradaRequestDTO request) {
         try{
-        String urlUsuario = "http://user-service/api/user/" + request.getClaveUsuario() + "/status";
+        String urlUsuario = "http://api-user:8082/api/user/" + request.getClaveUsuario() + "/status";
         Boolean isUserActive = restTemplate.getForObject(urlUsuario, Boolean.class);
 
         if(Boolean.FALSE.equals(isUserActive) || isUserActive == null) {
             return new EntradaResponseDTO(0, null, 0, null, "Error: El usuario no está activo o no existe.");
         }
 
-        String urlVehiculo = "http://vehicle-service/api/vehicle/" + request.getPlaca() + "/id-vehiculo";
+        String urlVehiculo = "http://api-vehicle:8084/api/vehiculos/placa/" + request.getPlaca() + "/id-vehiculo";
         String idVehiculoStr = restTemplate.getForObject(urlVehiculo, String.class);
 
         if (idVehiculoStr == null || idVehiculoStr.isEmpty()){
@@ -82,14 +82,14 @@ public class ParkingService {
 
     public SalidaResponseDTO registrarSalida(SalidaRequestDTO salidaRequest) {
     try{
-        String urlUsuario = "http://user-service/api/user/" + salidaRequest.getClaveUsuario() + "/status";
+        String urlUsuario = "http://api-user:8082/api/user/" + salidaRequest.getClaveUsuario() + "/status";
         Boolean isUserActive = restTemplate.getForObject(urlUsuario, Boolean.class);
 
         if(Boolean.FALSE.equals(isUserActive) || isUserActive == null) {
             return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: El usuario no está activo o no existe.");
         }
 
-        String urlVehiculo = "http://vehicle-service/api/vehiculos/placa/" + salidaRequest.getPlaca() + "/id-vehiculo";
+        String urlVehiculo = "http://api-vehicle:8084/api/vehiculos/placa/" + salidaRequest.getPlaca() + "/id-vehiculo";
         String idVehiculoStr = restTemplate.getForObject(urlVehiculo, String.class);
 
         if (idVehiculoStr == null || idVehiculoStr.isEmpty()){

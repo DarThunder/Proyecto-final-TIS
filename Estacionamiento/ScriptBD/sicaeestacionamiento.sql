@@ -138,18 +138,18 @@ INSERT INTO `espacioestacionamiento` VALUES (100, 'M025', 'M', b'0', b'1');
 -- Table structure for movimiento
 -- ----------------------------
 DROP TABLE IF EXISTS `movimiento`;
-CREATE TABLE `movimiento`  (
+CREATE TABLE `movimiento` (
   `idMovimiento` int NOT NULL AUTO_INCREMENT,
   `idVehiculo` int NOT NULL,
-  `tiempoEntrada` timestamp NOT NULL,
-  `tiempoSalida` timestamp NOT NULL,
-  `minutosEstacionado` int NULL DEFAULT NULL,
-  `horasCobradas` int NULL DEFAULT NULL,
-  `costoTotal` decimal(10, 2) NULL DEFAULT NULL,
-  `tarifaHora` decimal(10, 2) NOT NULL,
-  `tiempoCreacion` timestamp NULL DEFAULT NULL,
-  `tiempoActualizacion` timestamp NULL DEFAULT NULL,
   `idEspacio` int NOT NULL,
+  `tiempoEntrada` datetime NOT NULL,
+  `tiempoSalida` datetime DEFAULT NULL,
+  `minutosEstacionado` int DEFAULT NULL,
+  `horasCobradas` int DEFAULT NULL,
+  `tarifaHora` decimal(10,2) NOT NULL,
+  `costoTotal` decimal(10,2) DEFAULT NULL,
+  `tiempoCreacion` datetime NOT NULL,
+  `tiempoActualizacion` datetime DEFAULT NULL,
   PRIMARY KEY (`idMovimiento`) USING BTREE,
   INDEX `idEspacio`(`idEspacio` ASC) USING BTREE,
   CONSTRAINT `movimiento_ibfk_1` FOREIGN KEY (`idEspacio`) REFERENCES `espacioestacionamiento` (`idEspacio`) ON DELETE RESTRICT ON UPDATE RESTRICT
