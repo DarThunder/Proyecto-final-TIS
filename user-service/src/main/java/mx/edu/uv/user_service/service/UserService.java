@@ -58,7 +58,7 @@ public class UserService {
             throw new RuntimeException("Los identificadores de catálogo deben ser válidos y mayores a 0");
         }
 
-        //regex para ver si el correo es "username alfanumerico" + @ + "nombre de dominio alfanumero" + . + "dominio alfabetico de 2 a 6 charas"
+        //regex para ver si el correo es "username alfanumerico y caracteres especiales" + @ + "nombre de dominio alfanumerico y caracteres especiales" + . + "dominio alfabetico de 2 a 6 charas"
         String regexEmail = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
         if (request.getCorreo() == null || !request.getCorreo().matches(regexEmail)) {
             throw new RuntimeException("El formato del correo es inválido");
@@ -127,7 +127,7 @@ public class UserService {
             throw new RuntimeException("Los identificadores de catálogo deben ser válidos y mayores a 0");
         }
 
-        //regex para ver si el correo es "username alfanumerico" + @ + "nombre de dominio alfanumero" + . + "dominio alfabetico de 2 a 6 charas"
+        //regex para ver si el correo es "username alfanumerico y caracteres especiales" + @ + "nombre de dominio alfanumerico y caracteres especiales" + . + "dominio alfabetico de 2 a 6 charas"
         String regexEmail = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"; 
         if (request.getCorreo() == null || !request.getCorreo().matches(regexEmail)) {
             throw new RuntimeException("El formato del correo es inválido");
