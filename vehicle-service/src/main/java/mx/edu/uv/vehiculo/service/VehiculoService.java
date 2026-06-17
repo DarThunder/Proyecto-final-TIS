@@ -221,10 +221,12 @@ public class VehiculoService {
              if(vehiculoNuevo.getPlaca().length() > 7){
              throw new IllegalArgumentException("La placa del vehiculo debe tener 7 caracteres maximo");
             }
-            if (!validacionPlaca(vehiculoNuevo.getPlaca())) {
+            if(!vehiculoNuevo.getPlaca().equals(original.getPlaca())){
+                if (!validacionPlaca(vehiculoNuevo.getPlaca())) {
                 throw new IllegalArgumentException("Esa placa ya esta registrada, utilice otra");
+                }
+                original.setPlaca(vehiculoNuevo.getPlaca());
             }
-            original.setPlaca(vehiculoNuevo.getPlaca());
         }
         if (vehiculoNuevo.getColor() != null && !vehiculoNuevo.getColor().isEmpty()) {
             original.setColor(vehiculoNuevo.getColor());
