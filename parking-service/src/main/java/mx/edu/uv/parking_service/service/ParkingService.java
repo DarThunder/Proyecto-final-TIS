@@ -18,6 +18,9 @@ import mx.edu.uv.parking_service.dto.SalidaResponseDTO;
 import mx.edu.uv.parking_service.entity.EspacioEstacionamiento;
 import mx.edu.uv.parking_service.entity.Movimiento;
 
+/**
+ * Servicio encargado de la lógica de negocio del estacionamiento.
+ */
 @Service
 public class ParkingService {
     
@@ -25,124 +28,160 @@ public class ParkingService {
     private final EspacioEstacionamientoRepository espacioEstacionamientoRepository;
     private final RestTemplate restTemplate;
 
+    /**
+     * Constructor para la inyección de dependencias.
+     */
     public ParkingService(MovimientoRepository movimientoRepository, EspacioEstacionamientoRepository espacioEstacionamientoRepository, RestTemplate restTemplate) {
         this.movimientoRepository = movimientoRepository;
         this.espacioEstacionamientoRepository = espacioEstacionamientoRepository;
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Registra la entrada de un vehículo al estacionamiento validando previamente
+     * la existencia del usuario, del vehículo y la regla de negocio de cupo máximo por usuario.
+     */
     public EntradaResponseDTO registrarEntrada(EntradaRequestDTO request) {
-        try{
-        String urlUsuario = "http://api-user:8082/api/user/" + request.getClaveUsuario() + "/status";
-        Boolean isUserActive = restTemplate.getForObject(urlUsuario, Boolean.class);
+        try {
+            // 1.- Validar usuario
+            String urlUsuario = "http://api-user:8082/api/user/" + request.getClaveUsuario() + "/status";
+            Boolean isUserActive = restTemplate.getForObject(urlUsuario, Boolean.class);
 
-        if(Boolean.FALSE.equals(isUserActive) || isUserActive == null) {
-            return new EntradaResponseDTO(0, null, 0, null, "Error: El usuario no está activo o no existe.");
-        }
+            if(Boolean.FALSE.equals(isUserActive) || isUserActive == null) {
+                return new EntradaResponseDTO(0, null, 0, null, "Error: El usuario no está activo o no existe.");
+            }
 
-        String urlVehiculo = "http://api-vehicle:8084/api/vehiculos/placa/" + request.getPlaca() + "/id-vehiculo";
-        String idVehiculoStr = restTemplate.getForObject(urlVehiculo, String.class);
+            // 2.- Obtiene el ID del vehículo usando la placa en vehicle-service
+            String urlVehiculo = "http://api-vehicle:8084/api/vehiculos/placa/" + request.getPlaca() + "/id-vehiculo";
+            String idVehiculoStr = restTemplate.getForObject(urlVehiculo, String.class);
 
-        if (idVehiculoStr == null || idVehiculoStr.isEmpty()){
-            return new EntradaResponseDTO(0, null, 0, null, "Error: El vehículo no está activo o no existe.");
-        }
+            if (idVehiculoStr == null || idVehiculoStr.isEmpty()){
+                return new EntradaResponseDTO(0, null, 0, null, "Error: El vehículo no está activo o no existe.");
+            }
 
-        int idVehiculo = Integer.parseInt(idVehiculoStr);
+            int idVehiculo = Integer.parseInt(idVehiculoStr);
 
-        int vehiculosAdentro = movimientoRepository.contarVehiculosEstacionados(idVehiculo);
+            //Verifica límite de vehículos estacionados al mismo tiempo (Máximo 2)
+            int vehiculosAdentro = movimientoRepository.contarVehiculosEstacionados(idVehiculo);
+            if (vehiculosAdentro >= 2) {
+                return new EntradaResponseDTO(0, null, 0, null, "Error: El usuario ya alcanzó el límite de 2 vehículos dentro.");
+            }
 
-        if (vehiculosAdentro >=2) {
-            return new EntradaResponseDTO(0, null, 0, null, "Error: El usuario ya alcanzó el límite de 2 vehículos dentro.");
-        }
+            //4.- Crea y guarda el nuevo registro de movimiento
+            Movimiento movimiento = new Movimiento();
+            movimiento.setIdVehiculo(idVehiculo);
+            movimiento.setIdEspacio(request.getIdEspacio());
+            movimiento.setTiempoEntrada(request.getTiempoEntrada());
+            movimiento.setTiempoCreacion(request.getTiempoEntrada());
+            movimiento.setTarifaHora(request.getTarifaHora());
 
-        Movimiento movimiento = new Movimiento();
-        movimiento.setIdVehiculo(idVehiculo);
-        movimiento.setIdEspacio(request.getIdEspacio());
-        movimiento.setTiempoEntrada(request.getTiempoEntrada());
-        movimiento.setTiempoCreacion(request.getTiempoEntrada());
-        movimiento.setTarifaHora(request.getTarifaHora());
+            movimientoRepository.registrarMovimiento(movimiento);
 
-        movimientoRepository.registrarMovimiento(movimiento);
+            // 5.- Cambia el estatus del cajón de estacionamiento a "Ocupado"
+            espacioEstacionamientoRepository.ocuparEspacio(request.getIdEspacio());
 
-        espacioEstacionamientoRepository.ocuparEspacio(request.getIdEspacio());
-
-        return new EntradaResponseDTO(
-            0,
-            request.getTiempoEntrada(),
-            request.getIdEspacio(),
-            request.getTarifaHora(),
-            "Entrada registrada exitosamente"
-        );
-
+            // 6.- Respuesta Exitosa
+            return new EntradaResponseDTO(
+                0, // idMovimiento (podría mapearse si la BD retorna el ID generado)
+                request.getTiempoEntrada(),
+                request.getIdEspacio(),
+                request.getTarifaHora(),
+                "Entrada registrada exitosamente"
+            );
 
         } catch (Exception e) {
-            return new EntradaResponseDTO(0, null, 0, null, "Error: de comunicación con servicios." + e.getMessage());
+            // Manejo de errores de red (si algún microservicio está caído) o de base de datos
+            return new EntradaResponseDTO(0, null, 0, null, "Error: de comunicación con servicios. " + e.getMessage());
         }   
     }
 
+    /**
+     * Registra la salida de un vehículo calculando el tiempo que pasó dentro
+     * y el costo total a cobrar según la tarifa establecida.
+     */
     public SalidaResponseDTO registrarSalida(SalidaRequestDTO salidaRequest) {
-    try{
-        String urlUsuario = "http://api-user:8082/api/user/" + salidaRequest.getClaveUsuario() + "/status";
-        Boolean isUserActive = restTemplate.getForObject(urlUsuario, Boolean.class);
+        try {
+            // 1.- Validar usuario
+            String urlUsuario = "http://api-user:8082/api/user/" + salidaRequest.getClaveUsuario() + "/status";
+            Boolean isUserActive = restTemplate.getForObject(urlUsuario, Boolean.class);
 
-        if(Boolean.FALSE.equals(isUserActive) || isUserActive == null) {
-            return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: El usuario no está activo o no existe.");
-        }
+            if(Boolean.FALSE.equals(isUserActive) || isUserActive == null) {
+                return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: El usuario no está activo o no existe.");
+            }
 
-        String urlVehiculo = "http://api-vehicle:8084/api/vehiculos/placa/" + salidaRequest.getPlaca() + "/id-vehiculo";
-        String idVehiculoStr = restTemplate.getForObject(urlVehiculo, String.class);
+            // 2.- Obtiene el ID del vehículo usando la placa en vehicle-service
+            String urlVehiculo = "http://api-vehicle:8084/api/vehiculos/placa/" + salidaRequest.getPlaca() + "/id-vehiculo";
+            String idVehiculoStr = restTemplate.getForObject(urlVehiculo, String.class);
 
-        if (idVehiculoStr == null || idVehiculoStr.isEmpty()){
-            return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: El vehículo no está activo o no existe.");
-        }
+            if (idVehiculoStr == null || idVehiculoStr.isEmpty()){
+                return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: El vehículo no está activo o no existe.");
+            }
 
-        Movimiento movimiento = movimientoRepository.obtenerMovimientoActivo(Integer.parseInt(idVehiculoStr));
+            // 3.- Obtiene el movimiento de entrada que todavía no tiene salida
+            Movimiento movimiento = movimientoRepository.obtenerMovimientoActivo(Integer.parseInt(idVehiculoStr));
 
-        if (movimiento == null) {
-            return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: No se encontró un movimiento activo para este vehículo.");
-        }
+            if (movimiento == null) {
+                return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: No se encontró un movimiento activo para este vehículo.");
+            }
 
-        Duration duration = Duration.between(movimiento.getTiempoEntrada(), salidaRequest.getTiempoSalida());
-        long minutosEstacionado = duration.toMinutes();
+            // 4.- Cálculo de tiempo y costo
+            Duration duration = Duration.between(movimiento.getTiempoEntrada(), salidaRequest.getTiempoSalida());
+            long minutosEstacionado = duration.toMinutes();
 
-        double horasCalculadas = Math.ceil(minutosEstacionado / 60.0);
-        int horasCobradas = (int) horasCalculadas;
+            // Redondeo hacia arriba
+            double horasCalculadas = Math.ceil(minutosEstacionado / 60.0);
+            int horasCobradas = (int) horasCalculadas;
 
-        BigDecimal costoTotal = movimiento.getTarifaHora().multiply(new BigDecimal(horasCobradas));
+            // Multiplicación de horas por tarifa
+            BigDecimal costoTotal = movimiento.getTarifaHora().multiply(new BigDecimal(horasCobradas));
 
-        movimiento.setTiempoSalida(salidaRequest.getTiempoSalida());
-        movimiento.setMinutosEstacionado((int) minutosEstacionado);
-        movimiento.setHorasCobradas(horasCobradas);
-        movimiento.setCostoTotal(costoTotal);
-        movimiento.setTiempoActualizacion(salidaRequest.getTiempoSalida());
+            // 5.- Actualización del objeto Movimiento con los resultados del cálculo
+            movimiento.setTiempoSalida(salidaRequest.getTiempoSalida());
+            movimiento.setMinutosEstacionado((int) minutosEstacionado);
+            movimiento.setHorasCobradas(horasCobradas);
+            movimiento.setCostoTotal(costoTotal);
+            movimiento.setTiempoActualizacion(salidaRequest.getTiempoSalida());
 
-        movimientoRepository.actualizarMovimiento(movimiento);
-        espacioEstacionamientoRepository.liberarEspacio(movimiento.getIdEspacio());
+            // 6.- Guarda la salida y libera el cajón de estacionamiento
+            movimientoRepository.actualizarMovimiento(movimiento);
+            espacioEstacionamientoRepository.liberarEspacio(movimiento.getIdEspacio());
 
-        return new SalidaResponseDTO(
-            movimiento.getIdMovimiento(),
-            movimiento.getTiempoEntrada(),
-            movimiento.getTiempoSalida(),
-            movimiento.getIdEspacio(),
-            movimiento.getTarifaHora(),
-            movimiento.getCostoTotal(),
-            movimiento.getHorasCobradas(),
-            "Salida registrada exitosamente"
-        );
+            // 7.- Respuesta Exitosa con el recibo de cobro
+            return new SalidaResponseDTO(
+                movimiento.getIdMovimiento(),
+                movimiento.getTiempoEntrada(),
+                movimiento.getTiempoSalida(),
+                movimiento.getIdEspacio(),
+                movimiento.getTarifaHora(),
+                movimiento.getCostoTotal(),
+                movimiento.getHorasCobradas(),
+                "Salida registrada exitosamente"
+            );
 
         } catch (Exception e) {
-            return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: de comunicación con servicios." + e.getMessage());
+            return new SalidaResponseDTO(0, null, null, 0, null, null, 0, "Error: de comunicación con servicios. " + e.getMessage());
         } 
     }
 
+    /**
+     * Consulta la base de datos para pedir una lista de todos los espacios
+     * que se encuentran desocupados.
+     */
     public List<EspacioResponseDTO> obtenerEspaciosDisponibles() {
         List<EspacioResponseDTO> espaciosDisponibles = new ArrayList<>();
+        
+        // Solicita a la base de datos únicamente los espacios vacíos
         List<EspacioEstacionamiento> espacios = espacioEstacionamientoRepository.encontrarEspaciosVacios();
+        
+        // Mapea la Entidad de Base de Datos al DTO para no exponer información sensible
         for (EspacioEstacionamiento espacio : espacios) {
-            espaciosDisponibles.add(new EspacioResponseDTO(espacio.getIdEspacio(), espacio.getClaveEspacio(), espacio.getTipo()));
+            espaciosDisponibles.add(new EspacioResponseDTO(
+                espacio.getIdEspacio(), 
+                espacio.getClaveEspacio(), 
+                espacio.getTipo()
+            ));
         }
+        
         return espaciosDisponibles;
     }
-
 }
-
