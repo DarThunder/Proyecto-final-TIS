@@ -20,6 +20,19 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public LoginResponse autenticar(String username, String password){
+        if (username == null || username.trim().isEmpty()) {
+            throw new RuntimeException("El username es obligatorio");
+        }
+        if (username.length() > 50) {
+            throw new RuntimeException("El username es muy largo");
+        }
+        if (password == null || password.trim().isEmpty()) {
+            throw new RuntimeException("La contraseña es obligatoria");
+        }
+        if (password.length() > 100) {
+            throw new RuntimeException("La contraseña es muy larga");
+        }
+
         UserEntity user = authRepository.buscarPorUsername(username);
 
         if(user == null){

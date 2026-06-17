@@ -30,7 +30,37 @@ public class UserService {
             throw new RuntimeException("Acceso denegado: Solo los administradores pueden registrar usuarios");
         }
 
-        if (!request.getCorreo().contains("@")) {
+        if (request.getNombre() == null || request.getNombre().trim().isEmpty() || request.getNombre().length() > 50) {
+            throw new RuntimeException("El nombre es obligatorio y debe tener máximo 50 caracteres");
+        }
+
+        if (request.getApellidoPaterno() == null || request.getApellidoPaterno().trim().isEmpty() || request.getApellidoPaterno().length() > 50) {
+            throw new RuntimeException("El apellido paterno es obligatorio y debe tener máximo 50 caracteres");
+        }
+
+        if (request.getApellidoMaterno() != null && request.getApellidoMaterno().length() > 50) {
+            throw new RuntimeException("El apellido materno no puede exceder los 50 caracteres");
+        }
+
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty() || request.getUsername().length() > 50) {
+            throw new RuntimeException("El username es obligatorio y debe tener máximo 50 caracteres");
+        }
+
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty() || request.getPassword().length() > 100) {
+            throw new RuntimeException("La contraseña es obligatoria y debe tener máximo 100 caracteres");
+        }
+
+        if (request.getCorreo() == null || request.getCorreo().trim().isEmpty() || request.getCorreo().length() > 100) {
+            throw new RuntimeException("El correo es obligatorio y debe tener máximo 100 caracteres");
+        }
+
+        if (request.getIdRol() <= 0 || request.getIdTipoUsuario() <= 0 || request.getIdProgramaEducativo() <= 0) {
+            throw new RuntimeException("Los identificadores de catálogo deben ser válidos y mayores a 0");
+        }
+
+        //regex para ver si el correo es "username alfanumerico" + @ + "nombre de dominio alfanumero" + . + "dominio alfabetico de 2 a 6 charas"
+        String regexEmail = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+        if (request.getCorreo() == null || !request.getCorreo().matches(regexEmail)) {
             throw new RuntimeException("El formato del correo es inválido");
         }
 
@@ -73,7 +103,33 @@ public class UserService {
     }
 
     public String edit(int idUsuario, UserEditRequest request) {
-        if (!request.getCorreo().contains("@")) {
+        if (request.getNombre() == null || request.getNombre().trim().isEmpty() || request.getNombre().length() > 50) {
+            throw new RuntimeException("El nombre es obligatorio y debe tener máximo 50 caracteres");
+        }
+
+        if (request.getApellidoPaterno() == null || request.getApellidoPaterno().trim().isEmpty() || request.getApellidoPaterno().length() > 50) {
+            throw new RuntimeException("El apellido paterno es obligatorio y debe tener máximo 50 caracteres");
+        }
+
+        if (request.getApellidoMaterno() != null && request.getApellidoMaterno().length() > 50) {
+            throw new RuntimeException("El apellido materno no puede exceder los 50 caracteres");
+        }
+
+        if (request.getCorreo() == null || request.getCorreo().trim().isEmpty() || request.getCorreo().length() > 100) {
+            throw new RuntimeException("El correo es obligatorio y debe tener máximo 100 caracteres");
+        }
+
+        if (request.getTelefono() != null && request.getTelefono().length() > 15) {
+            throw new RuntimeException("El teléfono no puede exceder los 15 caracteres");
+        }
+
+        if (request.getIdRol() <= 0 || request.getIdTipoUsuario() <= 0 || request.getIdProgramaEducativo() <= 0) {
+            throw new RuntimeException("Los identificadores de catálogo deben ser válidos y mayores a 0");
+        }
+
+        //regex para ver si el correo es "username alfanumerico" + @ + "nombre de dominio alfanumero" + . + "dominio alfabetico de 2 a 6 charas"
+        String regexEmail = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"; 
+        if (request.getCorreo() == null || !request.getCorreo().matches(regexEmail)) {
             throw new RuntimeException("El formato del correo es inválido");
         }
 
