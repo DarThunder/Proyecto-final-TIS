@@ -20,7 +20,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public LoginResponse autenticar(String username, String password){
-        System.out.println("El puñetas del " + username + " y su contraseña mugrienta " + password);
         UserEntity user = authRepository.buscarPorUsername(username);
 
         if(user == null){

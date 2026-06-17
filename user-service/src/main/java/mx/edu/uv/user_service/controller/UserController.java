@@ -82,7 +82,7 @@ public class UserController {
     }
 
     //Endpoint PATCH para hacer un toggle al status de un usuario dado su id
-    @PatchMapping("/{idUsuario}/estatus")
+    @PatchMapping("/{idUsuario}/status")
     public ResponseEntity<?> changeStatusUser(@PathVariable int idUsuario, @RequestHeader("Authorization") String authHeader) {
         //Se usa try por si hubo un error atraparlo y que no se caiga el servicio
         try {
