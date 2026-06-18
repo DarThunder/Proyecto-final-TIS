@@ -188,7 +188,7 @@ public class VehiculoService {
      */
     public String obtenerIdVehiculoDePlacaService(String placa) {
         if (placa != null && !placa.trim().isEmpty()) {
-            if (placa.length() > 7) {
+            if (placa.length() <= 7) {
                 String idVehiculo = vr.obtenerIdVehiculoDePlacaRepository(placa);
                 if (idVehiculo != null) {
                     return idVehiculo;
