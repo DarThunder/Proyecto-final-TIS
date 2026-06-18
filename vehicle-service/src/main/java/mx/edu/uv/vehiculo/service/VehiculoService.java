@@ -234,10 +234,10 @@ public class VehiculoService {
             }
         }
         if (vehiculoNuevo.getIdModelo() != null) {
-            if(vehiculoNuevo.getIdModelo() > 0 && vehiculoNuevo.getIdModelo() <= 39){
-                original.setIdModelo(vehiculoNuevo.getIdModelo());
+            if(vehiculoNuevo.getIdModelo() <= 0 && vehiculoNuevo.getIdModelo() > 39){
+                 throw new IllegalArgumentException("Error con el campo de idModelo, ingrese un numero valido (1-39)");
             }
-             throw new IllegalArgumentException("Error con el campo de idModelo, ingrese un numero valido (1-39)");
+             original.setIdModelo(vehiculoNuevo.getIdModelo());
         }
         if (vehiculoNuevo.getPlaca() != null && !vehiculoNuevo.getPlaca().isEmpty()) {
             if (vehiculoNuevo.getPlaca().length() > 7) {
@@ -254,10 +254,10 @@ public class VehiculoService {
             original.setColor(vehiculoNuevo.getColor());
         }
         if (vehiculoNuevo.getAnio() != null) {
-            if(vehiculoNuevo.getAnio() > 1980 && vehiculoNuevo.getAnio() <= 2026){
-                original.setAnio(vehiculoNuevo.getAnio());
+            if(vehiculoNuevo.getAnio() < 1980 && vehiculoNuevo.getAnio() > 2026){
+                throw new IllegalArgumentException("Año invalido, ingresa un año valido (1980-2026)");
             }
-            throw new IllegalArgumentException("Año invalido, ingresa un año valido (1980-2026)");
+            original.setAnio(vehiculoNuevo.getAnio());
         }
         if (vehiculoNuevo.getDescripcion() != null && !vehiculoNuevo.getDescripcion().isEmpty()) {
             original.setDescripcion(vehiculoNuevo.getDescripcion());
