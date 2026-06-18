@@ -188,11 +188,14 @@ public class VehiculoService {
      */
     public String obtenerIdVehiculoDePlacaService(String placa) {
         if (placa != null && !placa.trim().isEmpty()) {
-            String idVehiculo = vr.obtenerIdVehiculoDePlacaRepository(placa);
-            if(idVehiculo != null){
-                return idVehiculo;
+            if (placa.length() > 7) {
+                String idVehiculo = vr.obtenerIdVehiculoDePlacaRepository(placa);
+                if (idVehiculo != null) {
+                    return idVehiculo;
+                }
+                throw new IllegalArgumentException("No se encontró un ID asignado a esa placa");
             }
-            throw new IllegalArgumentException("No se encontró un ID asignado a esa placa");
+            throw new IllegalArgumentException("La placa debe contar con maximo 7 caracteres");
         }
         throw new IllegalArgumentException("Ingresa una placa valida");
     }
