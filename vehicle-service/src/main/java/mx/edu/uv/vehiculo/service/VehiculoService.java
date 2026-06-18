@@ -233,8 +233,11 @@ public class VehiculoService {
                 original.setClaveVehiculo(vehiculoNuevo.getClaveVehiculo());
             }
         }
-        if (vehiculoNuevo.getIdModelo() != null && vehiculoNuevo.getIdModelo() > 0 && vehiculoNuevo.getIdModelo() <= 39) {
-            original.setIdModelo(vehiculoNuevo.getIdModelo());
+        if (vehiculoNuevo.getIdModelo() != null) {
+            if(vehiculoNuevo.getIdModelo() > 0 && vehiculoNuevo.getIdModelo() <= 39){
+                original.setIdModelo(vehiculoNuevo.getIdModelo());
+            }
+             throw new IllegalArgumentException("Error con el campo de idModelo, ingrese un numero valido (1-39)");
         }
         if (vehiculoNuevo.getPlaca() != null && !vehiculoNuevo.getPlaca().isEmpty()) {
             if (vehiculoNuevo.getPlaca().length() > 7) {
@@ -250,8 +253,11 @@ public class VehiculoService {
         if (vehiculoNuevo.getColor() != null && !vehiculoNuevo.getColor().isEmpty()) {
             original.setColor(vehiculoNuevo.getColor());
         }
-        if (vehiculoNuevo.getAnio() != null && vehiculoNuevo.getAnio() > 1980 && vehiculoNuevo.getAnio() <= 2026) {
-            original.setAnio(vehiculoNuevo.getAnio());
+        if (vehiculoNuevo.getAnio() != null) {
+            if(vehiculoNuevo.getAnio() > 1980 && vehiculoNuevo.getAnio() <= 2026){
+                original.setAnio(vehiculoNuevo.getAnio());
+            }
+            throw new IllegalArgumentException("Año invalido, ingresa un año valido (1980-2026)");
         }
         if (vehiculoNuevo.getDescripcion() != null && !vehiculoNuevo.getDescripcion().isEmpty()) {
             original.setDescripcion(vehiculoNuevo.getDescripcion());
