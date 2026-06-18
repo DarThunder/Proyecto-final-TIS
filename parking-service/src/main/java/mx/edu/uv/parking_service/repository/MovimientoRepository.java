@@ -23,4 +23,14 @@ public interface MovimientoRepository {
 
     @Select ("SELECT COUNT(*) FROM movimiento WHERE idVehiculo = #{idVehiculo} AND tiempoSalida IS NULL")
     int contarVehiculosEstacionados (@Param ("idVehiculo") int idVehiculo);
+
+    @Select({
+        "<script>",
+        "SELECT COUNT(*) FROM movimiento WHERE tiempoSalida IS NULL AND idVehiculo IN ",
+        "<foreach item='id' collection='idsVehiculos' open='(' separator=',' close=')'>",
+        "#{id}",
+        "</foreach>",
+        "</script>"
+    })
+    int contarVehiculosEstacionadosPorUsuario(@Param("idsVehiculos") List<Integer> idsVehiculos);
 }

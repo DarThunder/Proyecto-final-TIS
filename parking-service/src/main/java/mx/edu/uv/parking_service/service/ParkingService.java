@@ -61,13 +61,38 @@ public class ParkingService {
 
             int idVehiculo = Integer.parseInt(idVehiculoStr);
 
-            //Verifica límite de vehículos estacionados al mismo tiempo (Máximo 2)
-            int vehiculosAdentro = movimientoRepository.contarVehiculosEstacionados(idVehiculo);
-            if (vehiculosAdentro >= 2) {
-                return new EntradaResponseDTO(0, null, 0, null, "Error: El usuario ya alcanzó el límite de 2 vehículos dentro.");
+            // 3.- Verifica que el vehículo en específico no esté adentro (Evita clonación de auto)
+            int esteAutoAdentro = movimientoRepository.contarVehiculosEstacionados(idVehiculo);
+            if (esteAutoAdentro >= 1) {
+                return new EntradaResponseDTO(0, null, 0, null, "Error: Este vehículo ya se encuentra dentro del estacionamiento.");
             }
 
-            //4.- Crea y guarda el nuevo registro de movimiento
+            // 4.- Validar máximo 2 vehículos por usuario"
+            //Obtiene a qué usuario pertenece el vehículo
+            String urlDetalleVehiculo = "http://api-vehicle:8084/api/vehiculos/obtener-vehiculo/" + idVehiculo;
+            java.util.Map<String, Object> vehiculoInfo = restTemplate.getForObject(urlDetalleVehiculo, java.util.Map.class);
+            Integer idUsuario = (Integer) vehiculoInfo.get("idUsuario");
+
+            // B)Obtiene todos los vehículos de ese usuario
+            String urlVehiculosUsuario = "http://api-vehicle:8084/api/vehiculos/usuario-vehiculos/" + idUsuario;
+            List<java.util.Map<String, Object>> listaVehiculos = restTemplate.getForObject(urlVehiculosUsuario, List.class);
+
+            List<Integer> idsVehiculosUsuario = new ArrayList<>();
+            if (listaVehiculos != null) {
+                for (java.util.Map<String, Object> v : listaVehiculos) {
+                    idsVehiculosUsuario.add(((Number) v.get("idVehiculo")).intValue());
+                }
+            }
+
+            //Contamos cuántos de esos autos en total están adentro
+            if (!idsVehiculosUsuario.isEmpty()) {
+                int vehiculosAdentroUsuario = movimientoRepository.contarVehiculosEstacionadosPorUsuario(idsVehiculosUsuario);
+                if (vehiculosAdentroUsuario >= 2) {
+                    return new EntradaResponseDTO(0, null, 0, null, "Error: El usuario ya alcanzó el límite de 2 vehículos dentro.");
+                }
+            }
+
+            // 5.- Crea y guarda el nuevo registro de movimiento
             Movimiento movimiento = new Movimiento();
             movimiento.setIdVehiculo(idVehiculo);
             movimiento.setIdEspacio(request.getIdEspacio());
@@ -77,10 +102,10 @@ public class ParkingService {
 
             movimientoRepository.registrarMovimiento(movimiento);
 
-            // 5.- Cambia el estatus del cajón de estacionamiento a "Ocupado"
+            // 6.- Cambia el estatus del cajón de estacionamiento a "Ocupado"
             espacioEstacionamientoRepository.ocuparEspacio(request.getIdEspacio());
 
-            // 6.- Respuesta Exitosa
+            // 7.- Respuesta Exitosa
             return new EntradaResponseDTO(
                 0, // idMovimiento (podría mapearse si la BD retorna el ID generado)
                 request.getTiempoEntrada(),
