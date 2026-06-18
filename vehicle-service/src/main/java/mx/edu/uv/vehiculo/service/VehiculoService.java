@@ -53,17 +53,6 @@ public class VehiculoService {
     }
 
     /**
-     * PRUEBA RETORNO DE TODAS LAS MARCAS
-     *
-     * NO SE HACE NINGUNA VALICADIÓN
-     *
-     * @return
-     */
-    public List<Marca> obtenerMarcas() {
-        return vr.obtenerMarcasRepository();
-    }
-
-    /**
      * ACA SE HACE LA VALIDACIÓN DEL ID DEL USUARIO Y EN BASE A ESO SI ES VALIDO
      * RETORNA LA LISTA DE VEHICULOS A SU NOMBRE
      *
@@ -207,7 +196,7 @@ public class VehiculoService {
      * @return
      */
     public VehiculoFullEntity obtenerVehiculoDeIDService(Integer idVehiculo) {
-        if (idVehiculo == null || idVehiculo < 0) {
+        if (idVehiculo == null || idVehiculo <= 0) {
             throw new IllegalArgumentException("Ingresa un ID valido");
         }
         VehiculoFullEntity vehiculo = vr.obtenerVehiculoDeId2Repository(idVehiculo);

@@ -34,16 +34,6 @@ public class VehiculoController {
     }
 
     /**
-     * ENDPOINT DE PRUEBA PARA RETORNAR TODAS LAS MARCAS DE VEHICULOS
-     *
-     * @return
-     */
-    @GetMapping("/marcas")
-    public List<Marca> listarMarcas() {
-        return vs.obtenerMarcas();
-    }
-
-    /**
      * ENDPOINT PARA VER LA LISTA DE VEHICULOS DE UN USUARIO POR SU ID
      *
      * El usuario ingresa un ID dentro de la URL y devuelve la lista con los
