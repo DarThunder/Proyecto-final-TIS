@@ -254,7 +254,7 @@ public class VehiculoService {
             original.setColor(vehiculoNuevo.getColor());
         }
         if (vehiculoNuevo.getAnio() != null) {
-            if(vehiculoNuevo.getAnio() < 1980 && vehiculoNuevo.getAnio() > 2026){
+            if(vehiculoNuevo.getAnio() < 1980 || vehiculoNuevo.getAnio() > 2026){
                 throw new IllegalArgumentException("Año invalido, ingresa un año valido (1980-2026)");
             }
             original.setAnio(vehiculoNuevo.getAnio());
