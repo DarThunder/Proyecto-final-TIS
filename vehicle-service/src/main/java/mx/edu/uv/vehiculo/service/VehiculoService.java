@@ -188,7 +188,11 @@ public class VehiculoService {
      */
     public String obtenerIdVehiculoDePlacaService(String placa) {
         if (placa != null && !placa.trim().isEmpty()) {
-            return vr.obtenerIdVehiculoDePlacaRepository(placa);
+            String idVehiculo = vr.obtenerIdVehiculoDePlacaRepository(placa);
+            if(idVehiculo != null){
+                return idVehiculo;
+            }
+            throw new IllegalArgumentException("No se encontró un ID asignado a esa placa");
         }
         throw new IllegalArgumentException("Ingresa una placa valida");
     }
