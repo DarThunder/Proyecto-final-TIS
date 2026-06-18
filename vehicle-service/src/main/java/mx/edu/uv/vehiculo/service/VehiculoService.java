@@ -234,7 +234,7 @@ public class VehiculoService {
             }
         }
         if (vehiculoNuevo.getIdModelo() != null) {
-            if(vehiculoNuevo.getIdModelo() <= 0 && vehiculoNuevo.getIdModelo() > 39){
+            if(vehiculoNuevo.getIdModelo() <= 0 || vehiculoNuevo.getIdModelo() > 39){
                  throw new IllegalArgumentException("Error con el campo de idModelo, ingrese un numero valido (1-39)");
             }
              original.setIdModelo(vehiculoNuevo.getIdModelo());
