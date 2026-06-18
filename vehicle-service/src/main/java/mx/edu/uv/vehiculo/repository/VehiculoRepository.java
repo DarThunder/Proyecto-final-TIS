@@ -19,15 +19,6 @@ import org.apache.ibatis.annotations.Update;
 public interface VehiculoRepository {
 
     /**
-     * PRUEBA PARA VER QUE POSTMAN HICIERA LAS PETICIONES REGRESA TODA LA LISTA
-     * DE MARCAS DE VEHICULOS
-     *
-     * @return
-     */
-    @Select("SELECT * FROM marca")
-    List<Marca> obtenerMarcasRepository();
-
-    /**
      * SE OBTIENE TODO UN VEHICULO TAN SOLO DE SU ID
      *
      * @param idVehiculo

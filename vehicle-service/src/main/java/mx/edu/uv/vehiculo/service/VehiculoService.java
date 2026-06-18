@@ -53,17 +53,6 @@ public class VehiculoService {
     }
 
     /**
-     * PRUEBA RETORNO DE TODAS LAS MARCAS
-     *
-     * NO SE HACE NINGUNA VALICADIÓN
-     *
-     * @return
-     */
-    public List<Marca> obtenerMarcas() {
-        return vr.obtenerMarcasRepository();
-    }
-
-    /**
      * ACA SE HACE LA VALIDACIÓN DEL ID DEL USUARIO Y EN BASE A ESO SI ES VALIDO
      * RETORNA LA LISTA DE VEHICULOS A SU NOMBRE
      *
@@ -188,7 +177,14 @@ public class VehiculoService {
      */
     public String obtenerIdVehiculoDePlacaService(String placa) {
         if (placa != null && !placa.trim().isEmpty()) {
-            return vr.obtenerIdVehiculoDePlacaRepository(placa);
+            if (placa.length() <= 7) {
+                String idVehiculo = vr.obtenerIdVehiculoDePlacaRepository(placa);
+                if (idVehiculo != null) {
+                    return idVehiculo;
+                }
+                throw new IllegalArgumentException("No se encontró un ID asignado a esa placa");
+            }
+            throw new IllegalArgumentException("La placa debe contar con maximo 7 caracteres");
         }
         throw new IllegalArgumentException("Ingresa una placa valida");
     }
@@ -200,7 +196,7 @@ public class VehiculoService {
      * @return
      */
     public VehiculoFullEntity obtenerVehiculoDeIDService(Integer idVehiculo) {
-        if (idVehiculo == null || idVehiculo < 0) {
+        if (idVehiculo == null || idVehiculo <= 0) {
             throw new IllegalArgumentException("Ingresa un ID valido");
         }
         VehiculoFullEntity vehiculo = vr.obtenerVehiculoDeId2Repository(idVehiculo);
@@ -237,8 +233,11 @@ public class VehiculoService {
                 original.setClaveVehiculo(vehiculoNuevo.getClaveVehiculo());
             }
         }
-        if (vehiculoNuevo.getIdModelo() != null && vehiculoNuevo.getIdModelo() > 0 && vehiculoNuevo.getIdModelo() <= 39) {
-            original.setIdModelo(vehiculoNuevo.getIdModelo());
+        if (vehiculoNuevo.getIdModelo() != null) {
+            if(vehiculoNuevo.getIdModelo() <= 0 || vehiculoNuevo.getIdModelo() > 39){
+                 throw new IllegalArgumentException("Error con el campo de idModelo, ingrese un numero valido (1-39)");
+            }
+             original.setIdModelo(vehiculoNuevo.getIdModelo());
         }
         if (vehiculoNuevo.getPlaca() != null && !vehiculoNuevo.getPlaca().isEmpty()) {
             if (vehiculoNuevo.getPlaca().length() > 7) {
@@ -254,7 +253,10 @@ public class VehiculoService {
         if (vehiculoNuevo.getColor() != null && !vehiculoNuevo.getColor().isEmpty()) {
             original.setColor(vehiculoNuevo.getColor());
         }
-        if (vehiculoNuevo.getAnio() != null && vehiculoNuevo.getAnio() > 1980 && vehiculoNuevo.getAnio() <= 2026) {
+        if (vehiculoNuevo.getAnio() != null) {
+            if(vehiculoNuevo.getAnio() < 1980 || vehiculoNuevo.getAnio() > 2026){
+                throw new IllegalArgumentException("Año invalido, ingresa un año valido (1980-2026)");
+            }
             original.setAnio(vehiculoNuevo.getAnio());
         }
         if (vehiculoNuevo.getDescripcion() != null && !vehiculoNuevo.getDescripcion().isEmpty()) {
