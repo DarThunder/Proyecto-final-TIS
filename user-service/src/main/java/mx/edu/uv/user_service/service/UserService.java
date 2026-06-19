@@ -38,7 +38,7 @@ public class UserService {
             throw new RuntimeException("El apellido paterno es obligatorio y debe tener máximo 50 caracteres");
         }
 
-        if (request.getApellidoMaterno() != null && request.getApellidoMaterno().length() > 50) {
+        if (request.getApellidoMaterno().length() > 50) {
             throw new RuntimeException("El apellido materno no puede exceder los 50 caracteres");
         }
 
@@ -158,6 +158,10 @@ public class UserService {
         int idRol = jwtUtils.getIdRolFromJwtToken(token);
         if (idRol != 1) {
             throw new RuntimeException("Acceso denegado: Solo los administradores pueden cambiar el estatus de un usuario");
+        }
+
+        if(!userRepository.existeUsuario(idUsuario)){
+            throw new RuntimeException("El usuario no existe");
         }
 
         userRepository.cambiarEstatusUsuario(idUsuario);
