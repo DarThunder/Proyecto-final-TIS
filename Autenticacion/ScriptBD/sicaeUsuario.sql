@@ -222,7 +222,7 @@ SELECT setval('"public"."tipoUsuario_idTipo_seq"', 3, true);
 -- ----------------------------
 ALTER SEQUENCE "public"."usuario_idUsuario_seq"
 OWNED BY "public"."usuario"."idUsuario";
-SELECT setval('"public"."usuario_idUsuario_seq"', 1, true);
+SELECT setval('"public"."usuario_idUsuario_seq"', COALESCE((SELECT MAX("idUsuario") FROM "public"."usuario"), 1), true);
 
 -- ----------------------------
 -- Auto increment value for programaEducativo
@@ -257,7 +257,7 @@ ALTER TABLE "public"."tipoUsuario" ADD CONSTRAINT "tipoUsuario_pkey" PRIMARY KEY
 -- ----------------------------
 -- Auto increment value for usuario
 -- ----------------------------
-SELECT setval('"public"."usuario_idUsuario_seq"', 1, true);
+SELECT setval('"public"."usuario_idUsuario_seq"', COALESCE((SELECT MAX("idUsuario") FROM "public"."usuario"), 1), true);
 
 -- ----------------------------
 -- Primary Key structure for table usuario
